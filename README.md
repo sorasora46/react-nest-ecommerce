@@ -1,1 +1,1 @@
-# eCommerce-app
+# eCommerce with React.js + Nest.js
