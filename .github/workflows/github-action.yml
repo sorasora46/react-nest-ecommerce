@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  check_file_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  frontend_ci:
+    needs: check_file_changes
+    if: needs.check_file_changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.6.0
+      - uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          node-version: "20"
+          cache: pnpm
+      - name: Installing dependencies
+        run: pnpm install
+        working-directory: frontend
+      - name: Checking codestyle
+        run: pnpm lint
+        working-directory: frontend
+
+  backend_ci:
+    needs: check_file_changes
+    if: needs.check_file_changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.6.0
+      - uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: backend/pnpm-lock.yaml
+          node-version: "20"
+          cache: pnpm
+      - name: Installing dependencies
+        run: pnpm install
+        working-directory: backend
+      - name: Checking codestyle
+        run: pnpm lint
+        working-directory: backend
+      - name: Running tests
+        run: pnpm test
+        working-directory: backend

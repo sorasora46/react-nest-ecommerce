@@ -1,0 +1,11 @@
+node_modules/
+build/
+dist/
+test/
+*.env
+.prettierrc
+eslint.config.mjs
+*.md
+*.log
+.git
+.gitignore
