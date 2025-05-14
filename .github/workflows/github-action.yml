@@ -39,8 +39,10 @@ jobs:
           cache: pnpm
       - name: Installing dependencies
         run: pnpm install
+        working-directory: frontend
       - name: Checking codestyle
         run: pnpm lint
+        working-directory: frontend
 
   backend_ci:
     needs: check_file_changes
@@ -57,7 +59,10 @@ jobs:
           cache: pnpm
       - name: Installing dependencies
         run: pnpm install
+        working-directory: backend
       - name: Checking codestyle
         run: pnpm lint
+        working-directory: backend
       - name: Running tests
         run: pnpm test
+        working-directory: backend
