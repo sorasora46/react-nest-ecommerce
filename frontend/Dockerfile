@@ -27,7 +27,7 @@ ENV VITE_BACKEND_URL=${BACKEND_URL}
 RUN pnpm build
 
 # Run project
-FROM nginx AS runner
+FROM nginx:alpine AS runner
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
