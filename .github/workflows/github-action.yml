@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  check_file_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check file changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  frontend_ci:
+    needs: check_file_changes
+    if: needs.check_file_changes.outputs.frontend_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+      - name: Installing dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Checking codestyle
+        run: pnpm lint
+
+  backend_ci:
+    needs: check_file_changes
+    if: needs.check_file_changes.outputs.backend_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+      - name: Installing dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Checking codestyle
+        run: pnpm lint
+      - name: Running tests
+        run: pnpm test
